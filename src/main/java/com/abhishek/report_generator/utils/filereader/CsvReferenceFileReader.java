@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +18,10 @@ import com.abhishek.report_generator.model.ReferenceFileRecord;
 
 @Component
 public class CsvReferenceFileReader implements ReferenceFileReader{
-
-private String COMMA_DELIMITER = ",";
+	
+	private static final Logger logger = LoggerFactory.getLogger(CsvReferenceFileReader.class);
+	
+	private String COMMA_DELIMITER = ",";
 	
 	@Value("${REFERENCE_FILE_LOCATION}")
 	private String REFERENCE_FILE_LOCATION;
@@ -29,6 +33,8 @@ private String COMMA_DELIMITER = ",";
 		List<ReferenceFileRecord> records = new ArrayList<>();
 		String reference_file = REFERENCE_FILE_LOCATION;
 		
+		logger.info("Starting to read reference file from location: {}", reference_file);
+		
 		try (BufferedReader br = new BufferedReader(new FileReader(reference_file))) {
 			String line;
 			
@@ -39,12 +45,15 @@ private String COMMA_DELIMITER = ",";
 				String[] values = line.split(COMMA_DELIMITER);
 			        records.add(new ReferenceFileRecord(Arrays.asList(values)));
 			    }
+			
+			logger.info("Successfully read {} records from reference file.", records.size());
+			
 		}catch(FileNotFoundException e) {
-			e.printStackTrace();
+			logger.error("Reference file not found: {}", e.getMessage(), e);
 		}catch(IOException e) {
-			e.printStackTrace();
+			logger.error("Error reading reference file: {}", e.getMessage(), e);
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error("Unexpected error during reference file reading: {}", e.getMessage(), e);
 		}
 		
 		return records;

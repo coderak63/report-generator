@@ -1,7 +1,6 @@
 package com.abhishek.report_generator.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,12 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.abhishek.report_generator.mappingcondition.MappingCondition;
+import com.abhishek.report_generator.model.CompositeReferenceKey;
 import com.abhishek.report_generator.model.InputFileRecord;
 import com.abhishek.report_generator.model.OutputFileRecord;
 import com.abhishek.report_generator.model.ReferenceFileRecord;
 import com.abhishek.report_generator.transformrule.TransformRule;
-import com.abhishek.report_generator.utils.filegenerator.FileGenerator;
+import com.abhishek.report_generator.utils.filegenerator.OutputFileGenerator;
 import com.abhishek.report_generator.utils.filereader.InputFileReader;
 import com.abhishek.report_generator.utils.filereader.ReferenceFileReader;
 
@@ -29,6 +28,9 @@ public class ReportGenService {
 
     @Value("${REFERENCE_FILE_LOCATION}")
 	private String REFERENCE_FILE_LOCATION;
+    
+    @Value("${OUTPUT_FILE_LOCATION}")
+	private String OUTPUT_FILE_LOCATION;
 	
 	@Autowired
 	InputFileReader inputFileReader;
@@ -37,35 +39,45 @@ public class ReportGenService {
 	ReferenceFileReader referenceFileReader;
 	
 	@Autowired
-	FileGenerator outputFileGenerator;
+	OutputFileGenerator outputFileGenerator;
+	
 	
 	@Scheduled(cron = "${report.schedule.cron}")
 	public void generateReport() throws Exception{
+		
+		int inputFileLineCount = 0,outputFileLineCount = 0;
 		logger.info("Report generation started.");
 		
 		try {
-            List<InputFileRecord> inputFile = inputFileReader.readFile(INPUT_FILE_LOCATION);
-            logger.debug("Read {} records from input file.", inputFile.size());
             
-            List<ReferenceFileRecord> referenceFile = referenceFileReader.readFile(REFERENCE_FILE_LOCATION);
-            logger.debug("Read {} records from reference file.", referenceFile.size());
+			Map<CompositeReferenceKey, ReferenceFileRecord> referenceMap = referenceFileReader.readFile(REFERENCE_FILE_LOCATION);
+            logger.info("Read {} records from reference file.", referenceMap.size());
             
-            List<OutputFileRecord> outputFile = new ArrayList<>();
+    		logger.info("Starting to read input file from location: {}", INPUT_FILE_LOCATION);
+    		inputFileReader.initializeInputFile(INPUT_FILE_LOCATION);
+    		
+    		logger.info("Starting to write output file to location: {}", OUTPUT_FILE_LOCATION);
+    		outputFileGenerator.initializeOutputFile(OUTPUT_FILE_LOCATION);
             
-            for (InputFileRecord inputRecord : inputFile) {
-                ReferenceFileRecord ref = referenceFile.stream()
-                    .filter(r -> MappingCondition.condition(inputRecord, r))
-                    .findFirst()
-                    .orElse(null);
+    		while (inputFileReader.hasNext()) {
+                InputFileRecord inputFileRecord = inputFileReader.next();
+                inputFileLineCount++;
+                
+                ReferenceFileRecord ref = referenceMap.get(new CompositeReferenceKey(inputFileRecord));
 
                 if (ref != null) {
-                    OutputFileRecord outputFileRecord = TransformRule.getOutputFileRecord(inputRecord, ref);
-                    outputFile.add(outputFileRecord);
+                    OutputFileRecord outputFileRecord = TransformRule.getOutputFileRecord(inputFileRecord, ref);
+                    outputFileGenerator.writeLine(outputFileRecord.toString());
+                    outputFileLineCount++;
                 }
             }
             
-            logger.debug("Generated {} records for output file.", outputFile.size());
-            outputFileGenerator.generateOutputFile(outputFile);
+            outputFileGenerator.close();
+            
+            logger.info("Read {} records from input file.", inputFileLineCount);
+
+            logger.info("Successfully added {} records to output file.",outputFileLineCount);
+			logger.info("Output file generated successfully at location: {}", OUTPUT_FILE_LOCATION);
             logger.info("Report generation completed successfully.");
         } catch (Exception e) {
             logger.error("Error during report generation: {}", e.getMessage(), e);
@@ -74,4 +86,5 @@ public class ReportGenService {
 		
 		
 	}
+	
 }

@@ -4,14 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.abhishek.report_generator.model.CompositeReferenceKey;
 import com.abhishek.report_generator.model.ReferenceFileRecord;
 
 
@@ -22,12 +23,11 @@ public class CsvReferenceFileReader implements ReferenceFileReader{
 	
 	private String COMMA_DELIMITER = ",";
 	
-
+	
 	@Override
-	public List<ReferenceFileRecord> readFile(String reference_file) throws Exception{
+	public Map<CompositeReferenceKey, ReferenceFileRecord> readFile(String reference_file) throws Exception{
 
-		List<ReferenceFileRecord> records = new ArrayList<>();
-		
+		Map<CompositeReferenceKey, ReferenceFileRecord> referenceMap = new HashMap<CompositeReferenceKey, ReferenceFileRecord>();
 		logger.info("Starting to read reference file from location: {}", reference_file);
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(reference_file))) {
@@ -38,10 +38,12 @@ public class CsvReferenceFileReader implements ReferenceFileReader{
 						
 			while ((line = br.readLine()) != null) {
 				String[] values = line.split(COMMA_DELIMITER);
-			        records.add(new ReferenceFileRecord(Arrays.asList(values)));
-			    }
+
+			    ReferenceFileRecord referenceFileRecord = new ReferenceFileRecord(Arrays.asList(values));
+				referenceMap.put(new CompositeReferenceKey(referenceFileRecord), referenceFileRecord);
+			}
 			
-			logger.info("Successfully read {} records from reference file.", records.size());
+			logger.info("Successfully read {} records from reference file.", referenceMap.size());
 			
 		}catch(FileNotFoundException e) {
 			logger.error("Reference file not found: {}", e.getMessage(), e);
@@ -54,7 +56,9 @@ public class CsvReferenceFileReader implements ReferenceFileReader{
 			throw e;
 		}
 		
-		return records;
+		return referenceMap;
 	}
+	
+	
 
 }

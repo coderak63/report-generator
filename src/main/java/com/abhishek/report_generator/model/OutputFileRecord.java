@@ -56,6 +56,10 @@ public class OutputFileRecord {
 	public String toString() {
 		return outfield1 + "," + outfield2 + "," + outfield3 + "," + outfield4 + "," + outfield5;
 	}
+
+	public static String getHeaderString() {
+		return "outfield1,outfield2,outfield3,outfield4,outfield5";
+	}
 	
 	
 	

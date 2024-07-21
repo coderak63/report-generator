@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,12 @@ import com.abhishek.report_generator.utils.filereader.ReferenceFileReader;
 public class ReportGenService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReportGenService.class);
+
+    @Value("${INPUT_FILE_LOCATION}")
+	private String INPUT_FILE_LOCATION;
+
+    @Value("${REFERENCE_FILE_LOCATION}")
+	private String REFERENCE_FILE_LOCATION;
 	
 	@Autowired
 	InputFileReader inputFileReader;
@@ -33,14 +40,14 @@ public class ReportGenService {
 	FileGenerator outputFileGenerator;
 	
 	@Scheduled(cron = "${report.schedule.cron}")
-	public void generateReport() {
+	public void generateReport() throws Exception{
 		logger.info("Report generation started.");
 		
 		try {
-            List<InputFileRecord> inputFile = inputFileReader.readFile();
+            List<InputFileRecord> inputFile = inputFileReader.readFile(INPUT_FILE_LOCATION);
             logger.debug("Read {} records from input file.", inputFile.size());
             
-            List<ReferenceFileRecord> referenceFile = referenceFileReader.readFile();
+            List<ReferenceFileRecord> referenceFile = referenceFileReader.readFile(REFERENCE_FILE_LOCATION);
             logger.debug("Read {} records from reference file.", referenceFile.size());
             
             List<OutputFileRecord> outputFile = new ArrayList<>();

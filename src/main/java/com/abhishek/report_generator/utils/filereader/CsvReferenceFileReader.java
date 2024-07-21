@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.abhishek.report_generator.model.ReferenceFileRecord;
@@ -23,15 +22,11 @@ public class CsvReferenceFileReader implements ReferenceFileReader{
 	
 	private String COMMA_DELIMITER = ",";
 	
-	@Value("${REFERENCE_FILE_LOCATION}")
-	private String REFERENCE_FILE_LOCATION;
-	
 
 	@Override
-	public List<ReferenceFileRecord> readFile(){
+	public List<ReferenceFileRecord> readFile(String reference_file) throws Exception{
 
 		List<ReferenceFileRecord> records = new ArrayList<>();
-		String reference_file = REFERENCE_FILE_LOCATION;
 		
 		logger.info("Starting to read reference file from location: {}", reference_file);
 		
@@ -50,10 +45,13 @@ public class CsvReferenceFileReader implements ReferenceFileReader{
 			
 		}catch(FileNotFoundException e) {
 			logger.error("Reference file not found: {}", e.getMessage(), e);
+			throw new FileNotFoundException("File not found");
 		}catch(IOException e) {
 			logger.error("Error reading reference file: {}", e.getMessage(), e);
+			throw e;
 		}catch(Exception e) {
 			logger.error("Unexpected error during reference file reading: {}", e.getMessage(), e);
+			throw e;
 		}
 		
 		return records;

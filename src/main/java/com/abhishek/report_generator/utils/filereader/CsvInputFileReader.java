@@ -8,11 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.print.attribute.PrintJobAttribute;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.abhishek.report_generator.model.InputFileRecord;
@@ -24,15 +21,11 @@ public class CsvInputFileReader implements InputFileReader{
 
 	private String COMMA_DELIMITER = ",";
 	
-	@Value("${INPUT_FILE_LOCATION}")
-	private String INPUT_FILE_LOCATION;
-	
 
 	@Override
-	public List<InputFileRecord> readFile(){
+	public List<InputFileRecord> readFile(String input_file) throws Exception{
 
 		List<InputFileRecord> records = new ArrayList<>();
-		String input_file = INPUT_FILE_LOCATION;
 		logger.info("Starting to read input file from location: {}", input_file);
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(input_file))) {
@@ -49,10 +42,13 @@ public class CsvInputFileReader implements InputFileReader{
 			logger.info("Successfully read {} records from input file.", records.size());
 		}catch(FileNotFoundException e) {
 			logger.error("Input file not found: {}", e.getMessage(), e);
+			throw new FileNotFoundException("File not found");
 		}catch(IOException e) {
-			logger.error("Error reading input file: {}", e.getMessage(), e);	
+			logger.error("Error reading input file: {}", e.getMessage(), e);
+			throw e;
 		}catch(Exception e) {
-			logger.error("Unexpected error during input file reading: {}", e.getMessage(), e);	
+			logger.error("Unexpected error during input file reading: {}", e.getMessage(), e);
+			throw e;
 		}
 		
 		return records;

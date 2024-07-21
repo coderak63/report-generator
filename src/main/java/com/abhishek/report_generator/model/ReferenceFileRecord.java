@@ -69,5 +69,8 @@ public class ReferenceFileRecord {
 		this.refdata4 = refdata4;
 	}
     
-    
+    @Override
+	public String toString() {
+		return refkey1 + "," + refdata1 + "," + refkey2 + "," + refdata2 + "," + refdata3 + "," + refdata4;
+	}
 }

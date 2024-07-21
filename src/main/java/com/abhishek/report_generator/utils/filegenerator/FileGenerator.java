@@ -21,7 +21,7 @@ public class FileGenerator {
 	private String OUTPUT_FILE_LOCATION;
 	
 	
-	public void generateOutputFile(List<OutputFileRecord> outputFileRecords) {
+	public void generateOutputFile(List<OutputFileRecord> outputFileRecords) throws Exception{
 		
 		String outputFile = OUTPUT_FILE_LOCATION;
 		logger.info("Starting to generate output file at location: {}", outputFile);
@@ -43,6 +43,7 @@ public class FileGenerator {
 			
 		}catch(IOException e){
 			logger.error("Error writing to output file: {}", e.getMessage(), e);
+			throw e;
 		}
 	}
 }

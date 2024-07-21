@@ -78,6 +78,12 @@ public class InputFileRecord {
 	public void setRefkey2(String refkey2) {
 		this.refkey2 = refkey2;
 	}
+
+
+	@Override
+	public String toString() {
+		return field1 + "," + field2 + "," + field3 + "," + field4 + "," + field5 + "," + refkey1 + "," + refkey2;
+	}
     
     
 }

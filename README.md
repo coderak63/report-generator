@@ -64,15 +64,7 @@ Report generation can be scheduled by updating the cron expression in the `appli
 
 ### Transformation Rules
 
-The transformation rules are configurable and can be updated in the application properties or a separate configuration file.
-
-Example rules:
-
-- `outfield1 = field1 + field2`
-- `outfield2 = refdata1`
-- `outfield3 = refdata2 + refdata3`
-- `outfield4 = field3 * max(field5, refdata4)`
-- `outfield5 = max(field5, refdata4)`
+The transformation rules are configurable and can be updated in the TransformRule java class.
 
 ### Logging
 

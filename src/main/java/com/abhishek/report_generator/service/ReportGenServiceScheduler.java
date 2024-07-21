@@ -18,6 +18,7 @@ public class ReportGenServiceScheduler {
 	public void generateReportScheduler() {
 		
 		try {
+			logger.info("Scheduled report generation started.");
             service.generateReport();
             logger.info("Scheduled report generation completed successfully.");
         } catch (Exception e) {

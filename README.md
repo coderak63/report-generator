@@ -88,6 +88,4 @@ Contributions are welcome! Please fork the repository and create a pull request 
 ## Contact
 
 For any questions or suggestions, please contact Abhishek Kumar Singh at [abhishek.mnnit.mca2k22@gmail.com].
-```
 
-This should ensure that the `README.md` file is correctly formatted and all code snippets are properly shown.
